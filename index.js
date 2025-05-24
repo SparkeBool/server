@@ -20,7 +20,7 @@ const __dirname = path.dirname(__filename);
 
 // CORS Setup
 const allowedOrigins = [
-  'https://sparke-task-frontend.vercel.app/', // Local dev frontend
+  'https://sparke-task-frontend.vercel.app', // Local dev frontend
   process.env.CLIENT_URL,  // Production frontend URL from .env
 ].filter(Boolean);
 
