@@ -4,8 +4,6 @@ import helmet from 'helmet';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 import tasksRouter from './routes/tasks.js';
 import authRouter from './routes/auth.js';
@@ -14,24 +12,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Setup __dirname for ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // CORS Setup
 const allowedOrigins = [
-  'https://sparke-task-frontend.vercel.app', // Local dev frontend
-  process.env.CLIENT_URL,  // Production frontend URL from .env
+  'http://localhost:5173',                          // Local dev frontend
+  'https://sparke-task-frontend.vercel.app',        // Vercel frontend
 ].filter(Boolean);
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
   credentials: true,
 }));
 
 // Helmet Setup for Security
 app.use(helmet({
-  crossOriginResourcePolicy: false, // Allow serving static files like images, fonts, etc.
+  crossOriginResourcePolicy: false,
 }));
 
 app.use(cookieParser());
@@ -40,17 +40,6 @@ app.use(express.json());
 // API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/tasks', tasksRouter);
-
-// Serve frontend static files
-const frontendPath = path.join(__dirname, 'client', 'dist');
-app.use(express.static(frontendPath));
-
-// For any unmatched routes, serve the frontend index.html
-// Serve static files only if not an API request
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.resolve(frontendPath, 'index.html'));
-});
-
 
 // MongoDB Connection and Server Start
 mongoose.connect(process.env.MONGO_URI)
