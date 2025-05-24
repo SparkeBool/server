@@ -46,9 +46,11 @@ const frontendPath = path.join(__dirname, 'client', 'dist');
 app.use(express.static(frontendPath));
 
 // For any unmatched routes, serve the frontend index.html
-app.get('*', (req, res) => {
+// Serve static files only if not an API request
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.resolve(frontendPath, 'index.html'));
 });
+
 
 // MongoDB Connection and Server Start
 mongoose.connect(process.env.MONGO_URI)
