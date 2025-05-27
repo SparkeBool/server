@@ -39,11 +39,12 @@ router.post('/login', async (req, res) => {
     if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1d' });
-   res.cookie('token', token, {
-    httpOnly: true,
-    sameSite: 'Lax',
-    secure: process.env.NODE_ENV === 'production', // Secure only in production
-  });
+   
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'None',  // Required for cross-origin
+      secure: true,      // Required when SameSite=None
+    });
 
     res.json({ message: 'Logged in' });
   } catch (err) {
